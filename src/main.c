@@ -21,6 +21,24 @@ bool board_within_bounds(Board* board, int x, int y) {
 	return x >= 0 && x < board->cols && y >= 0 && y < board->rows;
 }
 
+Vector2 board_map_from_global(Board *board, float global_x, float global_y) {
+	return (struct Vector2) {
+		(global_x - board->bounds.x) / board->cell_size,
+		(global_y - board->bounds.y) / board->cell_size,
+	};
+}
+
+Vector2 board_map_to_global(Board *board, int board_x, int board_y) {
+	return (struct Vector2) {
+		board->bounds.x + board_x * board->cell_size,
+		board->bounds.y + board_y * board->cell_size,
+	};
+}
+
+int board_map_to_index(Board *board, int board_x, int board_y) {
+	return board_x + board->cols * board_y;
+}
+
 void board_populate(Board *board, int bomb_count) {
 	if (board->cells != NULL)
 		free(board->cells);
@@ -30,7 +48,7 @@ void board_populate(Board *board, int bomb_count) {
 	board->cells = malloc(capacity);
 	memset(board->cells, 0, capacity);
 
-	Vector2 neighbours[8] = { {-1, -1}, {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0} };
+	Vector2 neighbours[8] = {{-1, -1}, {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}};
 
 	while (bomb_count > 0) {
 		int cell = GetRandomValue(0, board->rows * board->cols - 1);
@@ -44,11 +62,13 @@ void board_populate(Board *board, int bomb_count) {
 			for (size_t i = 0; i < 8; i++) {
 				int neighbour_x = x + neighbours[i].x;
 				int neighbour_y = y + neighbours[i].y;
-				int neighbour_cell = neighbour_x + neighbour_y * board->cols;
 
-				if (board_within_bounds(board, neighbour_x, neighbour_y))
-					if (board->cells[neighbour_cell] != BOMB)
-						board->cells[neighbour_cell]++;
+				if (board_within_bounds(board, neighbour_x, neighbour_y)) {
+					int neighbour_index = board_map_to_index(board, neighbour_x, neighbour_y);
+					
+					if (board->cells[neighbour_index] != BOMB)
+						board->cells[neighbour_index]++;
+				}
 			}
 
 			bomb_count--;
@@ -56,9 +76,16 @@ void board_populate(Board *board, int bomb_count) {
 	}
 }
 
-void board_hide(Board* board) {
+void board_hide(Board *board) {
 	for (size_t i = 0; i < board->rows * board->cols; i++)
 		board->cells[i] |= HIDDEN;
+}
+
+void board_reveal_at(Board *board, float global_x, float global_y) {
+	Vector2 board_position = board_map_from_global(board, global_x, global_y);
+	int cell_index = board_map_to_index(board, board_position.x, board_position.y);
+
+	board->cells[cell_index] &= board->cells[cell_index] ^ HIDDEN;
 }
 
 int main ()
@@ -105,22 +132,19 @@ int main ()
 		}
 
 		for (size_t i = 0; i < board.rows * board.cols; i++) {
+			int cell_type = board.cells[i];
 			int x = (i % board.cols);
 			int y = (i / board.rows);
 
-			Vector2 cell_pos = {
-				board.bounds.x + x * board.cell_size,
-				board.bounds.y + y * board.cell_size};
+			Vector2 cell_position = board_map_to_global(&board, x, y);
 			
-			if ((board.cells[i] & HIDDEN) == HIDDEN) {
-				//DrawRectangle(cell_pos.x, cell_pos.y, board.cell_size, board.cell_size, PURPLE);
-				//continue;
+			if ((cell_type & HIDDEN) == HIDDEN) {
+				DrawRectangle(cell_position.x, cell_position.y, board.cell_size, board.cell_size, PURPLE);
+				continue;
 			}
 
-			int cell_type = board.cells[i] ^ HIDDEN;
-
-			int centered_x = cell_pos.x + (board.cell_size) / 2;
-			int centered_y = cell_pos.y + (board.cell_size) / 2;
+			int centered_x = cell_position.x + (board.cell_size) / 2;
+			int centered_y = cell_position.y + (board.cell_size) / 2;
 
 			if (cell_type == BOMB)
 				DrawText("X", centered_x, centered_y, 20, DARKPURPLE);
@@ -133,6 +157,10 @@ int main ()
 		}
 
 		EndDrawing();
+
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			board_reveal_at(&board, GetMouseX(), GetMouseY());
+		}
 	}
 
 	free(board.cells);
