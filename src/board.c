@@ -5,33 +5,51 @@ bool board_within_bounds(Board* board, int x, int y) {
 	return x >= 0 && x < board->cols && y >= 0 && y < board->rows;
 }
 
-Vector2 board_map_from_global(Board *board, float global_x, float global_y) {
-	return (struct Vector2) {
+Vector2 board_map_from_global(Board* board, float global_x, float global_y) {
+	return (Vector2) {
 		(global_x - board->bounds.x) / board->cell_size,
-			(global_y - board->bounds.y) / board->cell_size,
+		(global_y - board->bounds.y) / board->cell_size,
 	};
 }
 
-Vector2 board_map_to_global(Board *board, int board_x, int board_y) {
-	return (struct Vector2) {
+Vector2 board_map_to_global(Board* board, int board_x, int board_y) {
+	return (Vector2) {
 		board->bounds.x + board_x * board->cell_size,
-			board->bounds.y + board_y * board->cell_size,
+		board->bounds.y + board_y * board->cell_size,
 	};
 }
 
-int board_map_to_index(Board *board, int board_x, int board_y) {
+int board_map_to_index(Board* board, int board_x, int board_y) {
 	return board_x + board->cols * board_y;
 }
 
-void board_populate(Board *board, int bomb_count) {
-	if (board->cells != NULL)
-		free(board->cells);
+Board board_create(int cols, int rows, float cell_size) {
+	Board board = {0};
+	board_resize(&board, cols, rows, cell_size);
+	board_clear(&board);
 
-	size_t capacity = (sizeof *board->cells) * board->rows * board->cols;
+	return board;
+}
 
-	board->cells = malloc(capacity);
-	memset(board->cells, 0, capacity);
+void board_resize(Board* board, int cols, int rows, float cell_size) {
+	board->cols = cols;
+	board->rows = rows;
+	board->cell_size = cell_size;
+	board->bounds.width = board->cols * board->cell_size;
+	board->bounds.height = board->rows * board->cell_size;
 
+	board->cells = malloc((sizeof *board->cells) * board->cols * board->rows);
+}
+
+void board_clear(Board* board) {
+	memset(board->cells, 0, (sizeof *board->cells) * board->cols * board->rows);
+}
+
+void board_destroy(Board* board) {
+	free(board->cells);
+}
+
+void board_populate(Board* board, int bomb_count) {
 	Vector2 neighbours[8] = {{-1, -1}, {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}};
 
 	while (bomb_count > 0) {
@@ -60,7 +78,7 @@ void board_populate(Board *board, int bomb_count) {
 	}
 }
 
-void board_hide(Board *board) {
+void board_hide(Board* board) {
 	for (size_t i = 0; i < board->rows * board->cols; i++)
 		board->cells[i] |= TYPE_HIDDEN;
 }
@@ -90,19 +108,30 @@ void board_reveal_at_collapse(Board* board, int x, int y, List *visited) {
 	board_reveal_at_collapse(board, x - 1, y, visited);
 }
 
-void board_reveal_at(Board *board, float global_x, float global_y) {
+void board_reveal_at(Board* board, int board_x, int board_y) {
 	List visited;
 	list_init(&visited, 5);
-
-	Vector2 board_position = board_map_from_global(board, global_x, global_y);
-	board_reveal_at_collapse(board, board_position.x, board_position.y, &visited);
-
+	board_reveal_at_collapse(board, board_x, board_y, &visited);
 	list_deinit(&visited);
 }
 
-void board_toggle_flag_at(Board* board, float global_x, float global_y) {
-	Vector2 board_position = board_map_from_global(board, global_x, global_y);
+void board_toggle_flag_at(Board* board, int board_x, int board_y) {
+	if (board_has_type_at(board, TYPE_HIDDEN, board_x, board_y))
+		board->cells[board_map_to_index(board, board_x, board_y)] ^= TYPE_FLAGGED;
+}
 
-	int cell_index = board_map_to_index(board, board_position.x, board_position.y);
-	board->cells[cell_index] ^= TYPE_FLAGGED;
+bool board_has_type_at(Board* board, CellType type, int board_x, int board_y) {
+	return (board->cells[board_map_to_index(board, board_x, board_y)] & type) == type;
+}
+
+bool board_has_flag_at(Board* board, int board_x, int board_y) {
+	return board_has_type_at(board, TYPE_FLAGGED, board_x, board_y);
+}
+
+bool board_has_bomb_at(Board* board, int board_x, int board_y) {
+	return board_has_type_at(board, TYPE_BOMB, board_x, board_y);
+}
+
+bool board_is_hidden_at(Board* board, int board_x, int board_y) {
+	return board_has_type_at(board, TYPE_HIDDEN, board_x, board_y);
 }

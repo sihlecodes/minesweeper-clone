@@ -3,7 +3,6 @@
 #include "raylib.h"
 #include "resource_dir.h"
 
-#include "helpers.h"
 #include "board.h"
 
 int main ()
@@ -13,20 +12,10 @@ int main ()
 	const int WINDOW_WIDTH = 1280;
 	const int WINDOW_HEIGHT = 800;
 
-	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Hello Raylib");
+	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Minesweeper clone");
 	SearchAndSetResourceDir("resources");
 
-	Board board = {
-		.cols = 8,
-		.rows = 8,
-		.cell_size = 64,
-		.cells = NULL,
-		
-		.bounds = {
-			.width = board.cols * board.cell_size,
-			.height = board.rows * board.cell_size,
-		}
-	};
+	Board board = board_create(8, 8, 64);
 
 	board.bounds.x = (WINDOW_WIDTH - board.bounds.width) / 2;
 	board.bounds.y = (WINDOW_HEIGHT - board.bounds.height) / 2;
@@ -80,14 +69,29 @@ int main ()
 
 		EndDrawing();
 
+		Vector2 board_position = board_map_from_global(&board, GetMouseX(), GetMouseY());
+
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			board_reveal_at(&board, GetMouseX(), GetMouseY());
+			if (board_has_flag_at(&board, board_position.x, board_position.y))
+				continue;
+
+			if (board_has_bomb_at(&board, board_position.x, board_position.y)) {
+				printf("Game over!\n");
+
+				board_clear(&board);
+				board_populate(&board, 10);
+				board_hide(&board);
+			}
+			else 
+				board_reveal_at(&board, board_position.x, board_position.y);
 		}
+
 		else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-			board_toggle_flag_at(&board, GetMouseX(), GetMouseY());
+			if (board_is_hidden_at(&board, board_position.x, board_position.y))
+				board_toggle_flag_at(&board, board_position.x, board_position.y);
 	}
 
-	free(board.cells);
+	board_destroy(&board);
 
 	CloseWindow();
 	return 0;

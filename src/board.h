@@ -18,20 +18,36 @@ typedef struct Board {
 	Rectangle bounds;
 } Board;
 
+Board board_create(int cols, int rows, float cell_size);
+
+void board_resize(Board* board, int cols, int rows, float cell_size);
+
+void board_clear(Board* board);
+
+void board_destroy(Board* board);
+
 bool board_within_bounds(Board* board, int x, int y);
 
-Vector2 board_map_from_global(Board *board, float global_x, float global_y);
+Vector2 board_map_from_global(Board* board, float global_x, float global_y);
 
-Vector2 board_map_to_global(Board *board, int board_x, int board_y);
+Vector2 board_map_to_global(Board* board, int board_x, int board_y);
 
-int board_map_to_index(Board *board, int board_x, int board_y);
+int board_map_to_index(Board* board, int board_x, int board_y);
 
-void board_populate(Board *board, int bomb_count);
+void board_populate(Board* board, int bomb_count);
 
-void board_hide(Board *board);
+void board_hide(Board* board);
 
 void board_reveal_at_collapse(Board* board, int x, int y, List *visited);
 
-void board_reveal_at(Board *board, float global_x, float global_y);
+void board_reveal_at(Board* board, int board_x, int board_y);
 
-void board_toggle_flag_at(Board* board, float global_x, float global_y);
+void board_toggle_flag_at(Board* board, int board_x, int board_y);
+
+bool board_has_type_at(Board* board, CellType type, int board_x, int board_y);
+
+bool board_has_flag_at(Board* board, int board_x, int board_y);
+
+bool board_has_bomb_at(Board* board, int board_x, int board_y);
+
+bool board_is_hidden_at(Board* board, int board_x, int board_y);
