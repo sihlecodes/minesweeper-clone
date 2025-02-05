@@ -2,7 +2,12 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 
+const char* basename(const char* path);
+
+#define ERROR(message) fprintf(stderr, "%s:%d: %s\n", basename(__FILE__), __LINE__, message)
 
 typedef struct List {
 	int *items;

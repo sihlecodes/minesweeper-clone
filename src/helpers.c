@@ -1,5 +1,21 @@
 #include "helpers.h"
 
+const char* basename(const char* path)
+{
+#ifdef _WIN32
+	char separator = '\\';
+#else
+	char separator = '/';
+#endif
+
+	const char* result = strrchr(path, separator);
+
+	if (result)
+		return ++result;
+
+	return "";
+}
+
 void list_init(List *list, int capacity) {
 	list->length = 0;
 	list->capacity = capacity;
@@ -12,10 +28,12 @@ void list_append(List *list, int item) {
 
 		void *resized = realloc(list->items, (sizeof *list->items) * list->capacity);
 
-		if (resized != NULL) 
+		if (resized != NULL)
 			list->items = resized;
-		else
-			printf("Something went wrong while resizing list\n");
+		else {
+			ERROR("Failed to resize the list.");
+			return;
+		}
 	}
 
 	list->items[list->length++] = item;
