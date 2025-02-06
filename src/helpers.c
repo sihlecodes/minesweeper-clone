@@ -1,6 +1,6 @@
 #include "helpers.h"
 
-const char* basename(const char* path)
+const char* basename_(const char* path)
 {
 #ifdef _WIN32
 	char separator = '\\';
