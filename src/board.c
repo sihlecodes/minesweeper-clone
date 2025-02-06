@@ -51,6 +51,7 @@ void board_destroy(Board* board) {
 
 void board_populate(Board* board, int bomb_count) {
 	Vector2 neighbours[8] = {{-1, -1}, {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}};
+	board->bomb_count = bomb_count;
 
 	while (bomb_count > 0) {
 		int cell = GetRandomValue(0, board->rows * board->cols - 1);

@@ -11,10 +11,11 @@ typedef enum CellType {
 } CellType;
 
 typedef struct Board {
+	int *cells;
 	int cols;
 	int rows;
+	int bomb_count;
 	float cell_size;
-	int *cells;
 	Rectangle bounds;
 } Board;
 

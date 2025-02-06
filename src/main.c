@@ -28,6 +28,8 @@ int main ()
 		BeginDrawing();
 		ClearBackground(SKYBLUE);
 
+		DrawText(TextFormat("Bombs: %d", board.bomb_count), 20, 20, 24, WHITE);
+
 		for (size_t x = 0; x <= board.cols; x++) {
 			float pos_x = board.bounds.x + x * board.cell_size;
 			DrawLine(pos_x, board.bounds.y, pos_x, board.bounds.y + board.bounds.height, BLUE);
@@ -39,16 +41,16 @@ int main ()
 		}
 
 		for (size_t i = 0; i < board.rows * board.cols; i++) {
-			int cell_type = board.cells[i];
+			int cell_value = board.cells[i];
 			int x = (i % board.cols);
 			int y = (i / board.rows);
 
 			Vector2 cell_position = board_map_to_global(&board, x, y);
 			
-			if ((cell_type & TYPE_HIDDEN) == TYPE_HIDDEN) {
+			if ((cell_value & TYPE_HIDDEN) == TYPE_HIDDEN) {
 				DrawRectangle(cell_position.x, cell_position.y, board.cell_size, board.cell_size, PURPLE);
 
-				if ((cell_type & TYPE_FLAGGED) == TYPE_FLAGGED)
+				if ((cell_value & TYPE_FLAGGED) == TYPE_FLAGGED)
 					DrawRectangle(cell_position.x, cell_position.y, board.cell_size, board.cell_size, YELLOW);
 
 				continue;
@@ -57,14 +59,11 @@ int main ()
 			int centered_x = cell_position.x + (board.cell_size) / 2;
 			int centered_y = cell_position.y + (board.cell_size) / 2;
 
-			if (cell_type == TYPE_BOMB)
+			if (cell_value == TYPE_BOMB)
 				DrawText("X", centered_x, centered_y, 20, DARKPURPLE);
 
-			else if (cell_type > 0) {
-				char type[2];
-				sprintf(type, "%d", cell_type);
-				DrawText(type, centered_x, centered_y, 20, RED);
-			}
+			else if (cell_value > 0)
+				DrawText(TextFormat("%d", cell_value), centered_x, centered_y, 20, RED);
 		}
 
 		EndDrawing();
@@ -86,9 +85,19 @@ int main ()
 				board_reveal_at(&board, board_position.x, board_position.y);
 		}
 
-		else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
-			if (board_is_hidden_at(&board, board_position.x, board_position.y))
-				board_toggle_flag_at(&board, board_position.x, board_position.y);
+		else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && board_is_hidden_at(&board, board_position.x, board_position.y)) {
+			if (board_has_flag_at(&board, board_position.x, board_position.y))
+				board.bomb_count++;
+
+			else if (board.bomb_count > 0)
+				board.bomb_count--;
+
+			else
+				continue;
+
+			board_toggle_flag_at(&board, board_position.x, board_position.y);
+			printf("Bombs left: %d\n", board.bomb_count);
+		}
 	}
 
 	board_destroy(&board);
