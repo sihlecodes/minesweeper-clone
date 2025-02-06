@@ -15,10 +15,10 @@ typedef struct List {
 	size_t capacity;
 } List;
 
-void list_init(List *list, int capacity);
+List list_create(size_t capacity);
 
 void list_append(List* list, int item);
 
 bool list_contains(List* list, int item);
 
-void list_deinit(List *list);
+void list_destroy(List *list);

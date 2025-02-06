@@ -109,10 +109,9 @@ void board_reveal_at_collapse(Board* board, int x, int y, List *visited) {
 }
 
 void board_reveal_at(Board* board, int board_x, int board_y) {
-	List visited;
-	list_init(&visited, 5);
+	List visited = list_create(5);
 	board_reveal_at_collapse(board, board_x, board_y, &visited);
-	list_deinit(&visited);
+	list_destroy(&visited);
 }
 
 void board_toggle_flag_at(Board* board, int board_x, int board_y) {

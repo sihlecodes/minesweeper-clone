@@ -16,10 +16,20 @@ const char* basename(const char* path)
 	return "";
 }
 
-void list_init(List *list, int capacity) {
-	list->length = 0;
-	list->capacity = capacity;
-	list->items = malloc((sizeof *list->items) * capacity);
+List list_create(size_t capacity) {
+	if (capacity <= 0)
+	{
+		ERROR("Capacity must to be greater than 0.");
+		return;
+	}
+
+	List list = {
+		.length = 0,
+		.capacity = capacity,
+		.items = malloc((sizeof *list.items) * capacity),
+	};
+
+	return list;
 }
 
 void list_append(List *list, int item) {
@@ -48,8 +58,6 @@ bool list_contains(List *list, int item) {
 	return false;
 }
 
-void list_deinit(List *list) {
-	list->length = 0;
-	list->capacity = 0;
+void list_destroy(List *list) {
 	free(list->items);
 }
