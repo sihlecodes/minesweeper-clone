@@ -23,11 +23,16 @@ int main ()
 	board_populate(&board, 10);
 	board_hide(&board);
 
+	double start = GetTime();
+	double elapsed;
+
 	while (!WindowShouldClose())
 	{
 		BeginDrawing();
 		ClearBackground(SKYBLUE);
 
+		elapsed = GetTime() - start;
+		DrawText(TextFormat("Time: %.0lf", elapsed), 20, 50, 24, WHITE);
 		DrawText(TextFormat("Bombs: %d", board.bomb_count), 20, 20, 24, WHITE);
 
 		for (size_t x = 0; x <= board.cols; x++) {
@@ -80,6 +85,7 @@ int main ()
 			if (board_has_bomb_at(&board, board_position.x, board_position.y)) {
 				printf("Game over!\n");
 
+				start = GetTime();
 				board_clear(&board);
 				board_populate(&board, 10);
 				board_hide(&board);
