@@ -20,7 +20,7 @@ List list_create(size_t capacity) {
 	if (capacity <= 0)
 	{
 		ERROR("Capacity must to be greater than 0.");
-		return;
+		return (List) {0};
 	}
 
 	List list = {
