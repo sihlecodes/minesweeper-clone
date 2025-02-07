@@ -70,6 +70,9 @@ int main ()
 
 		Vector2 board_position = board_map_from_global(&board, GetMouseX(), GetMouseY());
 
+		if (!board_within_bounds(&board, board_position.x, board_position.y))
+			continue;
+
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			if (board_has_flag_at(&board, board_position.x, board_position.y))
 				continue;
