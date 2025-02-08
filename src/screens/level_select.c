@@ -47,7 +47,33 @@ void update_screen_level_select(Board* board, double* start, GameScreen* screen)
 	if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		return;
 
+	int rows = 0, cols = 0, bomb_count = 0, cell_size;
+
 	if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Beginner")))) {
+		cols = rows = 8;
+		bomb_count = 10;
+		cell_size = 64;
+	}
+
+	else if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Intermediate")))) {
+		cols = rows = 16;
+		bomb_count = 40;
+		cell_size = 48;
+	}
+
+	else if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Expert")))) {
+		cols = 30;
+		rows = 16;
+		bomb_count = 99;
+		cell_size = 36;
+	}
+
+	if (rows > 0 && cols > 0 && bomb_count > 0)
+	{
+		board_resize(board, cols, rows, cell_size);
+		board_populate(board, bomb_count);
+		board_hide(board);
+
 		*start = GetTime();
 		*screen = SCREEN_GAME;
 	}

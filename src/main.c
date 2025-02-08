@@ -71,7 +71,7 @@ int main ()
 			break;
 
 		case SCREEN_GAME:
-			update_screen_game(&board, &start);
+			update_screen_game(&board, &screen);
 			break;
 		}
 

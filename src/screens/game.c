@@ -16,7 +16,7 @@ void render_screen_game(Board* board, RenderData* data, double elapsed) {
 
 	for (size_t i = 0; i < board->rows * board->cols; i++) {
 		int x = (i % board->cols);
-		int y = (i / board->rows);
+		int y = (i / board->cols);
 
 		Vector2 cell_position = board_map_to_global(board, x, y);
 		unsigned int cell_value = board_get_value_at(board, x, y);
@@ -41,7 +41,7 @@ void render_screen_game(Board* board, RenderData* data, double elapsed) {
 	}
 }
 
-void update_screen_game(Board *board, double* start) {
+void update_screen_game(Board *board, GameScreen* screen) {
 	Vector2 board_position = board_map_from_global(board, GetMouseX(), GetMouseY());
 
 	if (!board_within_bounds(board, board_position.x, board_position.y))
@@ -54,26 +54,12 @@ void update_screen_game(Board *board, double* start) {
 		if (board_has_bomb_at(board, board_position.x, board_position.y)) {
 			printf("Game over!\n");
 
-			*start = GetTime();
-			board_clear(board);
-			board_populate(board, 10);
-			board_hide(board);
+			*screen = SCREEN_LEVEL_SELECT;
 		}
-		else 
+		else
 			board_reveal_at(board, board_position.x, board_position.y);
 	}
 
-	else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && board_is_hidden_at(board, board_position.x, board_position.y)) {
-		if (board_has_flag_at(board, board_position.x, board_position.y))
-			board->bomb_count++;
-
-		else if (board->bomb_count > 0)
-			board->bomb_count--;
-
-		else
-			return;
-
+	else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && board_is_hidden_at(board, board_position.x, board_position.y))
 		board_toggle_flag_at(board, board_position.x, board_position.y);
-		printf("Bombs left: %d\n", board->bomb_count);
-	}
 }
