@@ -3,7 +3,20 @@
 #include "raylib.h"
 #include "resource_dir.h"
 
+#define CLAY_IMPLEMENTATION
+#include "vendor/clay.h"
+
+#define CLAY_RENDERER_RAYLIB_IMPLEMENTATION
+#include "vendor/clay_renderer_raylib.h"
+
+#include "screens.h"
 #include "board.h"
+
+Font fonts[2];
+
+void handle_clay_errors(Clay_ErrorData errorData) {
+	printf("%s\n", errorData.errorText.chars);
+}
 
 int main ()
 {
@@ -12,96 +25,76 @@ int main ()
 	const int WINDOW_WIDTH = 1280;
 	const int WINDOW_HEIGHT = 800;
 
+	RenderData render_data = {
+		.window_size = {
+			WINDOW_WIDTH,
+			WINDOW_HEIGHT,
+		},
+		.fonts = fonts,
+	};
+
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Minesweeper clone");
 	SearchAndSetResourceDir("resources");
 
+	const int FONT_ID_BODY = 0;
+	fonts[FONT_ID_BODY] = LoadFontEx("Roboto-Regular.ttf", 40, 0, 400);
+	SetTextureFilter(fonts[FONT_ID_BODY].texture, TEXTURE_FILTER_BILINEAR);
+
+	const int FONT_ID_HEADER = 1;
+	fonts[FONT_ID_HEADER] = LoadFontEx("RobotoMono-Medium.ttf", 40, 0, 400);
+	SetTextureFilter(fonts[FONT_ID_HEADER].texture, TEXTURE_FILTER_BILINEAR);
+
 	Board board = board_create(8, 8, 64);
-
-	board.bounds.x = (WINDOW_WIDTH - board.bounds.width) / 2;
-	board.bounds.y = (WINDOW_HEIGHT - board.bounds.height) / 2;
-
 	board_populate(&board, 10);
 	board_hide(&board);
 
 	double start = GetTime();
 	double elapsed;
 
+	GameScreen screen = SCREEN_LEVEL_SELECT;
+
+	uint64_t totalMemorySize = Clay_MinMemorySize();
+	Clay_Arena arena = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, malloc(totalMemorySize));
+	Clay_Initialize(arena, (Clay_Dimensions) { WINDOW_WIDTH, WINDOW_HEIGHT }, (Clay_ErrorHandler) { handle_clay_errors });
+	
+	Clay_SetMeasureTextFunction(Raylib_MeasureText, fonts);
+	//Clay_SetDebugModeEnabled(true);
+
 	while (!WindowShouldClose())
 	{
+		elapsed = GetTime() - start;
+		board_center(&board, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+		switch (screen) {
+		case SCREEN_LEVEL_SELECT:
+			update_screen_level_select(&board, &start, &screen);
+			break;
+
+		case SCREEN_GAME:
+			update_screen_game(&board, &screen);
+			break;
+		}
+
 		BeginDrawing();
 		ClearBackground(SKYBLUE);
 
-		elapsed = GetTime() - start;
-		DrawText(TextFormat("Time: %.0lf", elapsed), 20, 50, 24, WHITE);
-		DrawText(TextFormat("Bombs: %d", board.bomb_count), 20, 20, 24, WHITE);
+		switch (screen) {
+		case SCREEN_LEVEL_SELECT:
+			render_screen_level_select(&render_data);
+			break;
 
-		for (size_t x = 0; x <= board.cols; x++) {
-			float pos_x = board.bounds.x + x * board.cell_size;
-			DrawLine(pos_x, board.bounds.y, pos_x, board.bounds.y + board.bounds.height, BLUE);
-		}
-
-		for (size_t y = 0; y <= board.rows; y++) {
-			float pos_y = board.bounds.y + y * board.cell_size;
-			DrawLine(board.bounds.x, pos_y, board.bounds.x + board.bounds.width, pos_y, BLUE);
-		}
-
-		for (size_t i = 0; i < board.rows * board.cols; i++) {
-			int x = (i % board.cols);
-			int y = (i / board.rows);
-
-			unsigned int cell_value = board_get_value_at(&board, x, y);
-
-			Vector2 cell_position = board_map_to_global(&board, x, y);
-			
-			if (board_is_hidden_at(&board, x, y)) {
-				DrawRectangle(cell_position.x, cell_position.y, board.cell_size, board.cell_size, PURPLE);
-
-				if (board_has_flag_at(&board, x, y))
-					DrawRectangle(cell_position.x, cell_position.y, board.cell_size, board.cell_size, YELLOW);
-
-				continue;
-			}
-
-			int centered_x = cell_position.x + (board.cell_size) / 2;
-			int centered_y = cell_position.y + (board.cell_size) / 2;
-
-			if (board_has_bomb_at(&board, x, y))
-				DrawText("X", centered_x, centered_y, 20, DARKPURPLE);
-
-			else if (cell_value > 0)
-				DrawText(TextFormat("%d", cell_value), centered_x, centered_y, 20, RED);
+		case SCREEN_GAME:
+			render_screen_game(&board, &render_data, elapsed);
+			break;
 		}
 
 		EndDrawing();
-
-		Vector2 board_position = board_map_from_global(&board, GetMouseX(), GetMouseY());
-
-		if (!board_within_bounds(&board, board_position.x, board_position.y))
-			continue;
-
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			if (board_has_flag_at(&board, board_position.x, board_position.y))
-				continue;
-
-			if (board_has_bomb_at(&board, board_position.x, board_position.y)) {
-				printf("Game over!\n");
-
-				start = GetTime();
-				board_clear(&board);
-				board_populate(&board, 10);
-				board_hide(&board);
-			}
-			else 
-				board_reveal_at(&board, board_position.x, board_position.y);
-		}
-
-		else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && board_is_hidden_at(&board, board_position.x, board_position.y)) {
-			board_toggle_flag_at(&board, board_position.x, board_position.y);
-			printf("Bombs left: %d\n", board.bomb_count);
-		}
 	}
 
 	board_destroy(&board);
+
+	UnloadFont(fonts[FONT_ID_BODY]);
+	UnloadFont(fonts[FONT_ID_HEADER]);
 
 	CloseWindow();
 	return 0;
