@@ -94,7 +94,11 @@ void board_reveal_at_collapse(Board* board, int x, int y, List *visited) {
 		return;
 
 	list_append(visited, cell_index);
-	board->cells[cell_index] &= board->cells[cell_index] ^ TYPE_HIDDEN;
+
+	if (board_has_flag_at(board, x, y))
+		board_toggle_flag_at(board, x, y);
+
+	board->cells[cell_index] &= ~TYPE_HIDDEN;
 
 	if (board->cells[cell_index] > 0)
 		return;
@@ -116,8 +120,19 @@ void board_reveal_at(Board* board, int board_x, int board_y) {
 }
 
 void board_toggle_flag_at(Board* board, int board_x, int board_y) {
-	if (board_has_type_at(board, TYPE_HIDDEN, board_x, board_y))
-		board->cells[board_map_to_index(board, board_x, board_y)] ^= TYPE_FLAGGED;
+	if (!board_is_hidden_at(board, board_x, board_y))
+		return;
+
+	if (board_has_flag_at(board, board_x, board_y))
+		board->bomb_count++;
+
+	else if (board->bomb_count > 0)
+		board->bomb_count--;
+
+	else
+		return;
+
+	board->cells[board_map_to_index(board, board_x, board_y)] ^= TYPE_FLAGGED;
 }
 
 bool board_has_type_at(Board* board, CellType type, int board_x, int board_y) {
@@ -134,4 +149,8 @@ bool board_has_bomb_at(Board* board, int board_x, int board_y) {
 
 bool board_is_hidden_at(Board* board, int board_x, int board_y) {
 	return board_has_type_at(board, TYPE_HIDDEN, board_x, board_y);
+}
+
+unsigned int board_get_value_at(Board* board, int board_x, int board_y) {
+	return board->cells[board_map_to_index(board, board_x, board_y)] & ~(TYPE_FLAGGED | TYPE_HIDDEN);
 }

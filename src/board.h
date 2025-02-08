@@ -11,7 +11,7 @@ typedef enum CellType {
 } CellType;
 
 typedef struct Board {
-	int *cells;
+	unsigned int *cells;
 	int cols;
 	int rows;
 	int bomb_count;
@@ -52,3 +52,5 @@ bool board_has_flag_at(Board* board, int board_x, int board_y);
 bool board_has_bomb_at(Board* board, int board_x, int board_y);
 
 bool board_is_hidden_at(Board* board, int board_x, int board_y);
+
+unsigned int board_get_value_at(Board* board, int board_x, int board_y);

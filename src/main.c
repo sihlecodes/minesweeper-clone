@@ -46,16 +46,17 @@ int main ()
 		}
 
 		for (size_t i = 0; i < board.rows * board.cols; i++) {
-			int cell_value = board.cells[i];
 			int x = (i % board.cols);
 			int y = (i / board.rows);
 
+			unsigned int cell_value = board_get_value_at(&board, x, y);
+
 			Vector2 cell_position = board_map_to_global(&board, x, y);
 			
-			if ((cell_value & TYPE_HIDDEN) == TYPE_HIDDEN) {
+			if (board_is_hidden_at(&board, x, y)) {
 				DrawRectangle(cell_position.x, cell_position.y, board.cell_size, board.cell_size, PURPLE);
 
-				if ((cell_value & TYPE_FLAGGED) == TYPE_FLAGGED)
+				if (board_has_flag_at(&board, x, y))
 					DrawRectangle(cell_position.x, cell_position.y, board.cell_size, board.cell_size, YELLOW);
 
 				continue;
@@ -64,7 +65,7 @@ int main ()
 			int centered_x = cell_position.x + (board.cell_size) / 2;
 			int centered_y = cell_position.y + (board.cell_size) / 2;
 
-			if (cell_value == TYPE_BOMB)
+			if (board_has_bomb_at(&board, x, y))
 				DrawText("X", centered_x, centered_y, 20, DARKPURPLE);
 
 			else if (cell_value > 0)
@@ -95,15 +96,6 @@ int main ()
 		}
 
 		else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && board_is_hidden_at(&board, board_position.x, board_position.y)) {
-			if (board_has_flag_at(&board, board_position.x, board_position.y))
-				board.bomb_count++;
-
-			else if (board.bomb_count > 0)
-				board.bomb_count--;
-
-			else
-				continue;
-
 			board_toggle_flag_at(&board, board_position.x, board_position.y);
 			printf("Bombs left: %d\n", board.bomb_count);
 		}
