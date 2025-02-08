@@ -45,10 +45,6 @@ int main ()
 	SetTextureFilter(fonts[FONT_ID_HEADER].texture, TEXTURE_FILTER_BILINEAR);
 
 	Board board = board_create(8, 8, 64);
-
-	board.bounds.x = (WINDOW_WIDTH - board.bounds.width) / 2;
-	board.bounds.y = (WINDOW_HEIGHT - board.bounds.height) / 2;
-
 	board_populate(&board, 10);
 	board_hide(&board);
 
@@ -67,7 +63,8 @@ int main ()
 	while (!WindowShouldClose())
 	{
 		elapsed = GetTime() - start;
-		
+		board_center(&board, WINDOW_WIDTH, WINDOW_HEIGHT);
+
 		switch (screen) {
 		case SCREEN_LEVEL_SELECT:
 			update_screen_level_select(&board, &start, &screen);

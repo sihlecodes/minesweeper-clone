@@ -26,7 +26,6 @@ int board_map_to_index(Board* board, int board_x, int board_y) {
 Board board_create(int cols, int rows, float cell_size) {
 	Board board = {0};
 	board_resize(&board, cols, rows, cell_size);
-	board_clear(&board);
 
 	return board;
 }
@@ -39,6 +38,12 @@ void board_resize(Board* board, int cols, int rows, float cell_size) {
 	board->bounds.height = board->rows * board->cell_size;
 
 	board->cells = malloc((sizeof *board->cells) * board->cols * board->rows);
+	board_clear(board);
+}
+
+void board_center(Board* board, int width, int height) {
+	board->bounds.x = (width - board->bounds.width) / 2;
+	board->bounds.y = (height - board->bounds.height) / 2;
 }
 
 void board_clear(Board* board) {
@@ -60,7 +65,7 @@ void board_populate(Board* board, int bomb_count) {
 			board->cells[cell] = TYPE_BOMB;
 
 			int x = (cell % board->cols);
-			int y = (cell / board->rows);
+			int y = (cell / board->cols);
 
 			for (size_t i = 0; i < 8; i++) {
 				int neighbour_x = x + neighbours[i].x;
@@ -133,6 +138,10 @@ void board_toggle_flag_at(Board* board, int board_x, int board_y) {
 		return;
 
 	board->cells[board_map_to_index(board, board_x, board_y)] ^= TYPE_FLAGGED;
+
+#if DEBUG
+	printf("Bombs left: %d\n", board->bomb_count);
+#endif
 }
 
 bool board_has_type_at(Board* board, CellType type, int board_x, int board_y) {
