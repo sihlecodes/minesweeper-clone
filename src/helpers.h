@@ -4,10 +4,22 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include "raylib.h"
 
 const char* basename_(const char* path);
 
 #define ERROR(message) fprintf(stderr, "%s:%d: %s\n", basename_(__FILE__), __LINE__, message)
+
+typedef enum {
+	SCREEN_LEVEL_SELECT,
+	SCREEN_GAME,
+} GameScreen;
+
+typedef struct {
+	Font* fonts;
+	Vector2 window_size;
+} RenderData;
+
 
 typedef struct List {
 	int *items;
