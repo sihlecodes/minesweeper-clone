@@ -30,18 +30,39 @@ void render_screen_game(Board* board, RenderData* data, double elapsed) {
 			continue;
 		}
 
-		int centered_x = cell_position.x + (board->cell_size) / 2;
-		int centered_y = cell_position.y + (board->cell_size) / 2;
+		char* value = NULL;
+		Color color = DARKPURPLE;
 
 		if (cell_value == TYPE_BOMB)
-			DrawText("X", centered_x, centered_y, 20, DARKPURPLE);
+			value = "X";
 
-		else if (cell_value > 0)
-			DrawText(TextFormat("%d", cell_value), centered_x, centered_y, 20, RED);
+		else if (cell_value > 0) {
+			value = TextFormat("%d", cell_value);
+			color = RED;
+		}
+
+		if (value != NULL) {
+			Vector2 size = MeasureTextEx(data->fonts[1], value, VALUE_FONT_SIZE, FONT_SPACING);
+
+			size.x = cell_position.x + (board->cell_size - size.x) /2;
+			size.y = cell_position.y + (board->cell_size - size.y) /2;
+
+			DrawTextEx(data->fonts[1], value, size, VALUE_FONT_SIZE, FONT_SPACING, color);
+		}
 	}
 }
 
+bool input_disabled = false;
+
 void update_screen_game(Board *board, GameScreen* screen) {
+	if (IsKeyPressed(KEY_SPACE)) {
+		*screen = SCREEN_LEVEL_SELECT;
+		input_disabled = false;
+	}
+
+	if (input_disabled)
+		return;
+
 	Vector2 board_position = board_map_from_global(board, GetMouseX(), GetMouseY());
 
 	if (!board_within_bounds(board, board_position.x, board_position.y))
@@ -54,6 +75,7 @@ void update_screen_game(Board *board, GameScreen* screen) {
 		if (board_has_bomb_at(board, board_position.x, board_position.y)) {
 			printf("Game over!\n");
 
+			input_disabled = true;
 			//*screen = SCREEN_LEVEL_SELECT;
 
 			board_reveal_bombs(board);
