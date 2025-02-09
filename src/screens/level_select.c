@@ -65,7 +65,7 @@ void update_screen_level_select(Board* board, double* start, GameScreen* screen)
 		cols = 30;
 		rows = 16;
 		bomb_count = 99;
-		cell_size = 36;
+		cell_size = 40;
 	}
 
 	if (rows > 0 && cols > 0 && bomb_count > 0)
