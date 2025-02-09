@@ -54,10 +54,12 @@ void update_screen_game(Board *board, GameScreen* screen) {
 		if (board_has_bomb_at(board, board_position.x, board_position.y)) {
 			printf("Game over!\n");
 
-			*screen = SCREEN_LEVEL_SELECT;
+			//*screen = SCREEN_LEVEL_SELECT;
+
+			board_reveal_bombs(board);
 		}
-		else
-			board_reveal_at(board, board_position.x, board_position.y);
+
+		board_reveal_collapse_at(board, board_position.x, board_position.y);
 	}
 
 	else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && board_is_hidden_at(board, board_position.x, board_position.y))

@@ -41,9 +41,11 @@ void board_populate(Board* board, int bomb_count);
 
 void board_hide(Board* board);
 
-void board_reveal_at_collapse(Board* board, int x, int y, List *visited);
+void board_reveal_collapse_at(Board* board, int board_x, int board_y);
 
 void board_reveal_at(Board* board, int board_x, int board_y);
+
+void board_reveal_bombs(Board* board);
 
 void board_toggle_flag_at(Board* board, int board_x, int board_y);
 

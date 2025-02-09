@@ -89,7 +89,11 @@ void board_hide(Board* board) {
 		board->cells[i] |= TYPE_HIDDEN;
 }
 
-void board_reveal_at_collapse(Board* board, int x, int y, List *visited) {
+void board_reveal_at(Board* board, int board_x, int board_y) {
+	board->cells[board_map_to_index(board, board_x, board_y)] &= ~TYPE_HIDDEN;
+}
+
+static void recursive_board_reveal_collapse_at(Board* board, int x, int y, List *visited) {
 	if (!board_within_bounds(board, x, y))
 		return;
 
@@ -103,25 +107,35 @@ void board_reveal_at_collapse(Board* board, int x, int y, List *visited) {
 	if (board_has_flag_at(board, x, y))
 		board_toggle_flag_at(board, x, y);
 
-	board->cells[cell_index] &= ~TYPE_HIDDEN;
+	board_reveal_at(board, x, y);
 
 	if (board->cells[cell_index] > 0)
 		return;
 
-	board_reveal_at_collapse(board, x - 1, y - 1, visited);
-	board_reveal_at_collapse(board, x, y - 1, visited);
-	board_reveal_at_collapse(board, x + 1, y - 1, visited);
-	board_reveal_at_collapse(board, x + 1, y, visited);
-	board_reveal_at_collapse(board, x + 1, y + 1, visited);
-	board_reveal_at_collapse(board, x, y + 1, visited);
-	board_reveal_at_collapse(board, x - 1, y + 1, visited);
-	board_reveal_at_collapse(board, x - 1, y, visited);
+	recursive_board_reveal_collapse_at(board, x - 1, y - 1, visited);
+	recursive_board_reveal_collapse_at(board, x, y - 1, visited);
+	recursive_board_reveal_collapse_at(board, x + 1, y - 1, visited);
+	recursive_board_reveal_collapse_at(board, x + 1, y, visited);
+	recursive_board_reveal_collapse_at(board, x + 1, y + 1, visited);
+	recursive_board_reveal_collapse_at(board, x, y + 1, visited);
+	recursive_board_reveal_collapse_at(board, x - 1, y + 1, visited);
+	recursive_board_reveal_collapse_at(board, x - 1, y, visited);
 }
 
-void board_reveal_at(Board* board, int board_x, int board_y) {
+void board_reveal_collapse_at(Board* board, int board_x, int board_y) {
 	List visited = list_create(5);
-	board_reveal_at_collapse(board, board_x, board_y, &visited);
+	recursive_board_reveal_collapse_at(board, board_x, board_y, &visited);
 	list_destroy(&visited);
+}
+
+void board_reveal_bombs(Board* board) {
+	for (size_t i = 0; i < board->rows * board->cols; i++) {
+		int x = i % board->cols;
+		int y = i / board->cols;
+
+		if (board_has_bomb_at(board, x, y))
+			board_reveal_at(board, x, y);
+	}
 }
 
 void board_toggle_flag_at(Board* board, int board_x, int board_y) {
