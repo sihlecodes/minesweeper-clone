@@ -14,7 +14,9 @@ typedef struct Board {
 	unsigned int *cells;
 	int cols;
 	int rows;
+	int flag_count;
 	int bomb_count;
+	int hidden_count;
 	float cell_size;
 	Rectangle bounds;
 } Board;

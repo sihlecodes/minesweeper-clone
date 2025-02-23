@@ -53,6 +53,7 @@ void board_center(Board* board, int width, int height) {
 
 void board_clear(Board* board) {
 	memset(board->cells, 0, (sizeof *board->cells) * board->cols * board->rows);
+	board->hidden_count = 0;
 }
 
 void board_destroy(Board* board) {
@@ -62,7 +63,7 @@ void board_destroy(Board* board) {
 
 void board_populate(Board* board, int bomb_count) {
 	Vector2 neighbours[8] = {{-1, -1}, {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}};
-	board->bomb_count = bomb_count;
+	board->bomb_count = board->flag_count = bomb_count;
 
 	while (bomb_count > 0) {
 		int cell = GetRandomValue(0, board->rows * board->cols - 1);
@@ -91,11 +92,15 @@ void board_populate(Board* board, int bomb_count) {
 }
 
 void board_hide(Board* board) {
-	for (size_t i = 0; i < board->rows * board->cols; i++)
-		board->cells[i] |= TYPE_HIDDEN;
+	while (board->hidden_count < board->rows * board->cols)
+		board->cells[board->hidden_count++] |= TYPE_HIDDEN;
 }
 
 void board_reveal_at(Board* board, int board_x, int board_y) {
+	if (!board_is_hidden_at(board, board_x, board_y))
+		return;
+
+	board->hidden_count--;
 	board->cells[board_map_to_index(board, board_x, board_y)] &= ~TYPE_HIDDEN;
 }
 
@@ -149,10 +154,10 @@ void board_toggle_flag_at(Board* board, int board_x, int board_y) {
 		return;
 
 	if (board_has_flag_at(board, board_x, board_y))
-		board->bomb_count++;
+		board->flag_count++;
 
-	else if (board->bomb_count > 0)
-		board->bomb_count--;
+	else if (board->flag_count > 0)
+		board->flag_count--;
 
 	else
 		return;
@@ -160,7 +165,7 @@ void board_toggle_flag_at(Board* board, int board_x, int board_y) {
 	board->cells[board_map_to_index(board, board_x, board_y)] ^= TYPE_FLAGGED;
 
 #if DEBUG
-	printf("Bombs left: %d\n", board->bomb_count);
+	printf("Flags left: %d\n", board->flag_count);
 #endif
 }
 

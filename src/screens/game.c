@@ -12,7 +12,7 @@ Color COLOR_VALUES[8] = { BLUE, DARKGREEN, RED, DARKBLUE, DARKRED, CYAN, BLACK, 
 #define CLITERAL(type) (type)
 
 void render_screen_game(Board* board, RenderData* data, double elapsed) {
-	DrawTextEx(data->fonts[1], TextFormat("Bombs: %d", board->bomb_count), (Vector2) { 20, 20 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
+	DrawTextEx(data->fonts[1], TextFormat("Flags: %d", board->flag_count), (Vector2) { 20, 20 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
 	DrawTextEx(data->fonts[1], TextFormat("Time: %.0lf", elapsed), (Vector2) { 20, 50 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
 
 	const int VALUE_FONT_SIZE = board->cell_size * .6;
@@ -88,14 +88,18 @@ void update_screen_game(Board *board, GameScreen* screen) {
 
 		if (board_has_bomb_at(board, board_position.x, board_position.y)) {
 			printf("Game over!\n");
-
 			input_disabled = true;
-			//*screen = SCREEN_LEVEL_SELECT;
 
+			//*screen = SCREEN_LEVEL_SELECT;
 			board_reveal_bombs(board);
 		}
 
 		board_reveal_collapse_at(board, board_position.x, board_position.y);
+
+		if (board->hidden_count == board->bomb_count) {
+			printf("You win!");
+			input_disabled = true;
+		}
 	}
 
 	else if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && board_is_hidden_at(board, board_position.x, board_position.y))
