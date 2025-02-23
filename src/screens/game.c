@@ -3,11 +3,19 @@
 #define FONT_SPACING 0
 #define UI_FONT_SIZE 24
 
+#define DARKRED CLITERAL(Color) { 161, 0, 0, 255 }
+#define CYAN	CLITERAL(Color) { 0, 241, 241, 255 }
+
+#define CLITERAL(type)
+Color COLOR_VALUES[8] = { BLUE, DARKGREEN, RED, DARKBLUE, DARKRED, CYAN, BLACK, DARKGRAY };
+
+#define CLITERAL(type) (type)
+
 void render_screen_game(Board* board, RenderData* data, double elapsed) {
 	DrawTextEx(data->fonts[1], TextFormat("Bombs: %d", board->bomb_count), (Vector2) { 20, 20 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
 	DrawTextEx(data->fonts[1], TextFormat("Time: %.0lf", elapsed), (Vector2) { 20, 50 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
 
-	const int VALUE_FONT_SIZE = board->cell_size * .55;
+	const int VALUE_FONT_SIZE = board->cell_size * .6;
 
 	for (size_t x = 0; x <= board->cols; x++) {
 		float pos_x = board->bounds.x + x * board->cell_size;
@@ -35,22 +43,23 @@ void render_screen_game(Board* board, RenderData* data, double elapsed) {
 			continue;
 		}
 
-		char* value = NULL;
-		Color color = DARKPURPLE;
+		const char* value = NULL;
+		Color color;
 
-		if (cell_value == TYPE_BOMB)
+		if (cell_value == TYPE_BOMB) {
+			color = DARKPURPLE;
 			value = "X";
-
-		else if (cell_value > 0) {
+		}
+		else if (cell_value != 0) {
+			color = COLOR_VALUES[cell_value - 1];
 			value = TextFormat("%d", cell_value);
-			color = RED;
 		}
 
 		if (value != NULL) {
 			Vector2 size = MeasureTextEx(data->fonts[1], value, VALUE_FONT_SIZE, FONT_SPACING);
 
-			size.x = cell_position.x + (board->cell_size - size.x) /2;
-			size.y = cell_position.y + (board->cell_size - size.y) /2;
+			size.x = cell_position.x + (board->cell_size - size.x) / 2;
+			size.y = cell_position.y + (board->cell_size - size.y) / 2;
 
 			DrawTextEx(data->fonts[1], value, size, VALUE_FONT_SIZE, FONT_SPACING, color);
 		}
