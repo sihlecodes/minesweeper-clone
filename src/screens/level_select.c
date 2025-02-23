@@ -41,40 +41,27 @@ void render_screen_level_select(RenderData* data) {
 	Clay_Raylib_Render(renderCommands, data->fonts);
 }
 
+void prepare_game(Board* board, int cols, int rows, int bomb_count, int cell_size, double* start, GameScreen* screen) {
+	board_resize(board, cols, rows, cell_size);
+	board_populate(board, bomb_count);
+	board_hide(board);
+
+	*start = GetTime();
+	*screen = SCREEN_GAME;
+}
+
 void update_screen_level_select(Board* board, double* start, GameScreen* screen) {
 	Clay_SetPointerState((Clay_Vector2) { GetMouseX(), GetMouseY() }, false);
 
 	if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		return;
 
-	int rows = 0, cols = 0, bomb_count = 0, cell_size;
+	if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Beginner"))))
+		prepare_game(board, 8, 8, 10, 64, start, screen);
 
-	if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Beginner")))) {
-		cols = rows = 8;
-		bomb_count = 10;
-		cell_size = 64;
-	}
+	else if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Intermediate"))))
+		prepare_game(board, 16, 16, 40, 48, start, screen);
 
-	else if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Intermediate")))) {
-		cols = rows = 16;
-		bomb_count = 40;
-		cell_size = 48;
-	}
-
-	else if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Expert")))) {
-		cols = 30;
-		rows = 16;
-		bomb_count = 99;
-		cell_size = 40;
-	}
-
-	if (rows > 0 && cols > 0 && bomb_count > 0)
-	{
-		board_resize(board, cols, rows, cell_size);
-		board_populate(board, bomb_count);
-		board_hide(board);
-
-		*start = GetTime();
-		*screen = SCREEN_GAME;
-	}
+	else if (Clay_PointerOver(Clay_GetElementId(CLAY_STRING("Expert"))))
+		prepare_game(board, 30, 16, 99, 40, start, screen);
 }

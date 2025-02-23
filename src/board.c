@@ -1,5 +1,6 @@
 #include "board.h"
 #include <stdlib.h>
+#include <assert.h>
 
 bool board_within_bounds(Board* board, int x, int y) {
 	return x >= 0 && x < board->cols && y >= 0 && y < board->rows;
@@ -31,6 +32,8 @@ Board board_create(int cols, int rows, float cell_size) {
 }
 
 void board_resize(Board* board, int cols, int rows, float cell_size) {
+	board_destroy(board);
+
 	board->cols = cols;
 	board->rows = rows;
 	board->cell_size = cell_size;
@@ -38,6 +41,8 @@ void board_resize(Board* board, int cols, int rows, float cell_size) {
 	board->bounds.height = board->rows * board->cell_size;
 
 	board->cells = malloc((sizeof *board->cells) * board->cols * board->rows);
+	assert(board->cells != NULL);
+
 	board_clear(board);
 }
 
@@ -51,7 +56,8 @@ void board_clear(Board* board) {
 }
 
 void board_destroy(Board* board) {
-	free(board->cells);
+	if (board->cells != NULL)
+		free(board->cells);
 }
 
 void board_populate(Board* board, int bomb_count) {

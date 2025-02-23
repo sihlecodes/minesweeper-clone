@@ -7,4 +7,5 @@
 #include "board.h"
 
 void render_screen_level_select(RenderData* data);
+
 void update_screen_level_select(Board* board, double* start, GameScreen* screen);

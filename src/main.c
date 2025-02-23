@@ -44,9 +44,7 @@ int main ()
 	fonts[FONT_ID_HEADER] = LoadFontEx("RobotoMono-Medium.ttf", 40, 0, 400);
 	SetTextureFilter(fonts[FONT_ID_HEADER].texture, TEXTURE_FILTER_BILINEAR);
 
-	Board board = board_create(8, 8, 64);
-	board_populate(&board, 10);
-	board_hide(&board);
+	Board board = {0};
 
 	double start = GetTime();
 	double elapsed;
