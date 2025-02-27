@@ -11,7 +11,9 @@ Color COLOR_VALUES[8] = { BLUE, DARKGREEN, RED, DARKBLUE, DARKRED, CYAN, BLACK, 
 
 #define CLITERAL(type) (type)
 
-void render_screen_game(Board* board, RenderData* data, double elapsed) {
+double elapsed;
+
+void render_screen_game(Board* board, RenderData* data) {
 	DrawTextEx(data->fonts[1], TextFormat("Flags: %d", board->flag_count), (Vector2) { 20, 20 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
 	DrawTextEx(data->fonts[1], TextFormat("Time: %.0lf", elapsed), (Vector2) { 20, 50 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
 
@@ -66,17 +68,18 @@ void render_screen_game(Board* board, RenderData* data, double elapsed) {
 	}
 }
 
-bool input_disabled = false;
+bool is_game_over = false;
 
-void update_screen_game(Board *board, GameScreen* screen) {
+void update_screen_game(Board *board, double* start, GameScreen* screen) {
 	if (IsKeyPressed(KEY_SPACE)) {
 		*screen = SCREEN_LEVEL_SELECT;
-		input_disabled = false;
+		is_game_over = false;
 	}
 
-	if (input_disabled)
+	if (is_game_over)
 		return;
 
+	elapsed = GetTime() - *start;
 	Vector2 board_position = board_map_from_global(board, GetMouseX(), GetMouseY());
 
 	if (!board_within_bounds(board, board_position.x, board_position.y))
@@ -88,7 +91,7 @@ void update_screen_game(Board *board, GameScreen* screen) {
 
 		if (board_has_bomb_at(board, board_position.x, board_position.y)) {
 			printf("Game over!\n");
-			input_disabled = true;
+			is_game_over = true;
 
 			//*screen = SCREEN_LEVEL_SELECT;
 			board_reveal_bombs(board);
@@ -98,7 +101,7 @@ void update_screen_game(Board *board, GameScreen* screen) {
 
 		if (board->hidden_count == board->bomb_count) {
 			printf("You win!");
-			input_disabled = true;
+			is_game_over = true;
 		}
 	}
 

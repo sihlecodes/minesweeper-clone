@@ -3,6 +3,6 @@
 #include "raylib.h"
 #include "board.h"
 
-void render_screen_game(Board* board, RenderData* data, double elapsed);
+void render_screen_game(Board* board, RenderData* data);
 
-void update_screen_game(Board *board, GameScreen* screen);
+void update_screen_game(Board *board, double* start, GameScreen* screen);

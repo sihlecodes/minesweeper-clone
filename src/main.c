@@ -44,11 +44,9 @@ int main ()
 	fonts[FONT_ID_HEADER] = LoadFontEx("RobotoMono-Medium.ttf", 40, 0, 400);
 	SetTextureFilter(fonts[FONT_ID_HEADER].texture, TEXTURE_FILTER_BILINEAR);
 
-	Board board = {0};
-
 	double start = GetTime();
-	double elapsed;
 
+	Board board = {0};
 	GameScreen screen = SCREEN_LEVEL_SELECT;
 
 	uint64_t totalMemorySize = Clay_MinMemorySize();
@@ -60,7 +58,6 @@ int main ()
 
 	while (!WindowShouldClose())
 	{
-		elapsed = GetTime() - start;
 		board_center(&board, GetScreenWidth(), GetScreenHeight());
 
 		switch (screen) {
@@ -69,7 +66,7 @@ int main ()
 			break;
 
 		case SCREEN_GAME:
-			update_screen_game(&board, &screen);
+			update_screen_game(&board, &start, &screen);
 			break;
 		}
 
@@ -82,7 +79,7 @@ int main ()
 			break;
 
 		case SCREEN_GAME:
-			render_screen_game(&board, &render_data, elapsed);
+			render_screen_game(&board, &render_data);
 			break;
 		}
 
