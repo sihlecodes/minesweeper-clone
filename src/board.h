@@ -25,7 +25,7 @@ Board board_create(int cols, int rows, float cell_size);
 
 void board_resize(Board* board, int cols, int rows, float cell_size);
 
-void board_center(Board* board, int width, int height);
+void board_center(Board* board, float width, float height);
 
 void board_clear(Board* board);
 

@@ -46,7 +46,7 @@ void board_resize(Board* board, int cols, int rows, float cell_size) {
 	board_clear(board);
 }
 
-void board_center(Board* board, int width, int height) {
+void board_center(Board* board, float width, float height) {
 	board->bounds.x = (width - board->bounds.width) / 2;
 	board->bounds.y = (height - board->bounds.height) / 2;
 }

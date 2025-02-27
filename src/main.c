@@ -61,7 +61,7 @@ int main ()
 	while (!WindowShouldClose())
 	{
 		elapsed = GetTime() - start;
-		board_center(&board, WINDOW_WIDTH, WINDOW_HEIGHT);
+		board_center(&board, GetScreenWidth(), GetScreenHeight());
 
 		switch (screen) {
 		case SCREEN_LEVEL_SELECT:
