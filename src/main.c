@@ -67,7 +67,7 @@ int main ()
 		}
 
 		BeginDrawing();
-		ClearBackground(SKYBLUE);
+		ClearBackground(WHITE);
 
 		switch (screen) {
 		case SCREEN_LEVEL_SELECT:

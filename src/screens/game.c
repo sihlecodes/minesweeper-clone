@@ -14,19 +14,19 @@ Color COLOR_VALUES[8] = { BLUE, DARKGREEN, RED, DARKBLUE, DARKRED, CYAN, BLACK, 
 double elapsed;
 
 void render_screen_game(Board* board, RenderData* data) {
-	DrawTextEx(data->fonts[1], TextFormat("Flags: %d", board->flag_count), (Vector2) { 20, 20 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
-	DrawTextEx(data->fonts[1], TextFormat("Time: %.0lf", elapsed), (Vector2) { 20, 50 }, UI_FONT_SIZE, FONT_SPACING, WHITE);
+	DrawTextEx(data->fonts[1], TextFormat("Flags: %d", board->flag_count), (Vector2) { 20, 20 }, UI_FONT_SIZE, FONT_SPACING, BLACK);
+	DrawTextEx(data->fonts[1], TextFormat("Time: %.0lf", elapsed), (Vector2) { 20, 50 }, UI_FONT_SIZE, FONT_SPACING, BLACK);
 
 	const int VALUE_FONT_SIZE = board->cell_size * .6;
 
 	for (size_t x = 0; x <= board->cols; x++) {
 		float pos_x = board->bounds.x + x * board->cell_size;
-		DrawLine(pos_x, board->bounds.y, pos_x, board->bounds.y + board->bounds.height, BLUE);
+		DrawLine(pos_x, board->bounds.y, pos_x, board->bounds.y + board->bounds.height, GRAY);
 	}
 
 	for (size_t y = 0; y <= board->rows; y++) {
 		float pos_y = board->bounds.y + y * board->cell_size;
-		DrawLine(board->bounds.x, pos_y, board->bounds.x + board->bounds.width, pos_y, BLUE);
+		DrawLine(board->bounds.x, pos_y, board->bounds.x + board->bounds.width, pos_y, GRAY);
 	}
 
 	for (size_t i = 0; i < board->rows * board->cols; i++) {
