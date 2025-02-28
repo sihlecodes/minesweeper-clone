@@ -30,6 +30,9 @@ int main ()
 
 	RenderData render_data = {
 		.fonts = fonts,
+		.block = LoadTexture("block.png"),
+		.flag = LoadTexture("flag.png"),
+		.bomb = LoadTexture("bomb.png"),
 	};
 
 	const int FONT_ID_BODY = 0;
@@ -83,6 +86,10 @@ int main ()
 	}
 
 	board_destroy(&board);
+
+	UnloadTexture(render_data.block);
+	UnloadTexture(render_data.flag);
+	UnloadTexture(render_data.bomb);
 
 	UnloadFont(fonts[FONT_ID_BODY]);
 	UnloadFont(fonts[FONT_ID_HEADER]);

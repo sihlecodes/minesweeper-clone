@@ -29,6 +29,8 @@ void render_screen_game(Board* board, RenderData* data) {
 		DrawLine(board->bounds.x, pos_y, board->bounds.x + board->bounds.width, pos_y, GRAY);
 	}
 
+	float texture_scale = board->cell_size / 128;
+
 	for (size_t i = 0; i < board->rows * board->cols; i++) {
 		int x = (i % board->cols);
 		int y = (i / board->cols);
@@ -37,10 +39,10 @@ void render_screen_game(Board* board, RenderData* data) {
 		unsigned int cell_value = board_get_value_at(board, x, y);
 
 		if (board_is_hidden_at(board, x, y)) {
-			DrawRectangle(cell_position.x, cell_position.y, board->cell_size, board->cell_size, PURPLE);
+			DrawTextureEx(data->block, cell_position, 0, texture_scale, WHITE);
 
 			if (board_has_flag_at(board, x, y))
-				DrawRectangle(cell_position.x, cell_position.y, board->cell_size, board->cell_size, YELLOW);
+				DrawTextureEx(data->flag, cell_position, 0, texture_scale, WHITE);
 
 			continue;
 		}
@@ -48,10 +50,9 @@ void render_screen_game(Board* board, RenderData* data) {
 		const char* value = NULL;
 		Color color;
 
-		if (cell_value == TYPE_BOMB) {
-			color = DARKPURPLE;
-			value = "X";
-		}
+		if (cell_value == TYPE_BOMB)
+			DrawTextureEx(data->bomb, cell_position, 0, texture_scale, WHITE);
+
 		else if (cell_value != 0) {
 			color = COLOR_VALUES[cell_value - 1];
 			value = TextFormat("%d", cell_value);

@@ -17,6 +17,9 @@ typedef enum {
 
 typedef struct {
 	Font* fonts;
+	Texture block;
+	Texture flag;
+	Texture bomb;
 } RenderData;
 
 
