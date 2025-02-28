@@ -18,23 +18,19 @@ void handle_clay_errors(Clay_ErrorData errorData) {
 	printf("%s\n", errorData.errorText.chars);
 }
 
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 800
+
 int main ()
 {
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
-	const int WINDOW_WIDTH = 1280;
-	const int WINDOW_HEIGHT = 800;
-
-	RenderData render_data = {
-		.window_size = {
-			WINDOW_WIDTH,
-			WINDOW_HEIGHT,
-		},
-		.fonts = fonts,
-	};
-
 	InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Minesweeper clone");
 	SearchAndSetResourceDir("resources");
+
+	RenderData render_data = {
+		.fonts = fonts,
+	};
 
 	const int FONT_ID_BODY = 0;
 	fonts[FONT_ID_BODY] = LoadFontEx("Roboto-Regular.ttf", 40, 0, 400);

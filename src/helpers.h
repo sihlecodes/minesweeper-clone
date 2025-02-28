@@ -17,7 +17,6 @@ typedef enum {
 
 typedef struct {
 	Font* fonts;
-	Vector2 window_size;
 } RenderData;
 
 

@@ -25,7 +25,7 @@ void render_screen_level_select(RenderData* data) {
 
 	CLAY({
 		.layout = {
-			.sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)},
+			.sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0) },
 			.childGap = 20,
 			.childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
 		},
