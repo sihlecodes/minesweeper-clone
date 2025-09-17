@@ -47,6 +47,8 @@ void board_reveal_collapse_at(Board* board, int board_x, int board_y);
 
 void board_reveal_at(Board* board, int board_x, int board_y);
 
+bool board_box_reveal_at(Board* board, int board_x, int board_y);
+
 void board_reveal_bombs(Board* board);
 
 void board_toggle_flag_at(Board* board, int board_x, int board_y);

@@ -104,6 +104,48 @@ void board_reveal_at(Board* board, int board_x, int board_y) {
 	board->cells[board_map_to_index(board, board_x, board_y)] &= ~TYPE_HIDDEN;
 }
 
+bool board_box_reveal_at(Board* board, int board_x, int board_y)
+{
+	bool revealed_bomb = false;
+
+	if (board_is_hidden_at(board, board_x, board_y))
+		return revealed_bomb;
+
+	int cell_value = board->cells[board_map_to_index(board, board_x, board_y)];
+	int flagged_cells = 0;
+
+	for (int i = -1; i < 2; i++) {
+		for (int j = -1; j < 2; j++) {
+			int current_x = board_x + i, current_y = board_y + j;
+
+			if (board_within_bounds(board, current_x, current_y) && board_has_flag_at(board, current_x, current_y))
+				flagged_cells++;
+		}
+	}
+
+	if (cell_value != flagged_cells)
+		return revealed_bomb;
+
+	for (int i = -1; i < 2; i++) {
+		for (int j = -1; j < 2; j++) {
+			int current_x = board_x + i, current_y = board_y + j;
+
+			if (!board_within_bounds(board, current_x, current_y))
+				continue;
+
+			if (!board_has_flag_at(board, current_x, current_y)) {
+				board_reveal_collapse_at(board, current_x, current_y);
+
+				if (board_has_bomb_at(board, current_x, current_y))
+					revealed_bomb = true;
+			}
+
+		}
+	}
+
+	return revealed_bomb;
+}
+
 static void recursive_board_reveal_collapse_at(Board* board, int x, int y, List *visited) {
 	if (!board_within_bounds(board, x, y))
 		return;
@@ -123,14 +165,14 @@ static void recursive_board_reveal_collapse_at(Board* board, int x, int y, List 
 	if (board->cells[cell_index] > 0)
 		return;
 
-	recursive_board_reveal_collapse_at(board, x - 1, y - 1, visited);
 	recursive_board_reveal_collapse_at(board, x, y - 1, visited);
-	recursive_board_reveal_collapse_at(board, x + 1, y - 1, visited);
-	recursive_board_reveal_collapse_at(board, x + 1, y, visited);
-	recursive_board_reveal_collapse_at(board, x + 1, y + 1, visited);
 	recursive_board_reveal_collapse_at(board, x, y + 1, visited);
+	recursive_board_reveal_collapse_at(board, x - 1, y - 1, visited);
 	recursive_board_reveal_collapse_at(board, x - 1, y + 1, visited);
 	recursive_board_reveal_collapse_at(board, x - 1, y, visited);
+	recursive_board_reveal_collapse_at(board, x + 1, y - 1, visited);
+	recursive_board_reveal_collapse_at(board, x + 1, y + 1, visited);
+	recursive_board_reveal_collapse_at(board, x + 1, y, visited);
 }
 
 void board_reveal_collapse_at(Board* board, int board_x, int board_y) {
@@ -170,6 +212,9 @@ void board_toggle_flag_at(Board* board, int board_x, int board_y) {
 }
 
 bool board_has_type_at(Board* board, CellType type, int board_x, int board_y) {
+	if (!board_within_bounds(board, board_x, board_y))
+		ERROR("Type lookup outside the bounds on the board");
+
 	return (board->cells[board_map_to_index(board, board_x, board_y)] & type) == type;
 }
 

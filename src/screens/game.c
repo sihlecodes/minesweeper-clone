@@ -71,6 +71,14 @@ void render_screen_game(Board* board, RenderData* data) {
 
 bool is_game_over = false;
 
+void game_over(Board* board) {
+	printf("Game over!\n");
+	is_game_over = true;
+
+	//*screen = SCREEN_LEVEL_SELECT;
+	board_reveal_bombs(board);
+}
+
 void update_screen_game(Board *board, double* start, GameScreen* screen) {
 	if (IsKeyPressed(KEY_SPACE)) {
 		*screen = SCREEN_LEVEL_SELECT;
@@ -90,15 +98,14 @@ void update_screen_game(Board *board, double* start, GameScreen* screen) {
 		if (board_has_flag_at(board, board_position.x, board_position.y))
 			return;
 
-		if (board_has_bomb_at(board, board_position.x, board_position.y)) {
-			printf("Game over!\n");
-			is_game_over = true;
+		if (board_has_bomb_at(board, board_position.x, board_position.y))
+			return game_over(board);
 
-			//*screen = SCREEN_LEVEL_SELECT;
-			board_reveal_bombs(board);
-		}
+		if (board_is_hidden_at(board, board_position.x, board_position.y))
+			board_reveal_collapse_at(board, board_position.x, board_position.y);
 
-		board_reveal_collapse_at(board, board_position.x, board_position.y);
+		else if (board_box_reveal_at(board, board_position.x, board_position.y))
+			return game_over(board);
 
 		if (board->hidden_count == board->bomb_count) {
 			printf("You win!");
